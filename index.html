@@ -1,0 +1,228 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Mega AI</title>
+<style>
+:root{--bg:#070712;--p:#101226;--t:#e8eaff;--m:#8b90b8;--a:#7c8cff;--b:#ffffff1c;--g:0 0 0 #0000}
+[data-th=light]{--bg:#f3f4fb;--p:#fff;--t:#14152b;--m:#666b8f;--a:#4a5bff;--b:#0000001c}
+[data-th=neon]{--bg:#02010a;--p:#0a0720;--t:#e9fff9;--m:#7fb9ad;--a:#00ffc8;--b:#00ffc866;--g:0 0 14px #00ffc855}
+*{box-sizing:border-box;margin:0;font-family:system-ui,sans-serif}
+html,body{height:100%;background:var(--bg);color:var(--t);overflow:hidden}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:var(--p);border:1px solid var(--b);border-radius:12px;padding:8px 12px;box-shadow:var(--g)}
+button:hover{border-color:var(--a)}
+input,select{background:var(--p);border:1px solid var(--b);border-radius:12px;padding:11px 14px;width:100%;outline:0}
+input:focus{border-color:var(--a)}
+.hide{display:none!important}
+#auth{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(#070712cc,#070712cc),url(/media/bg/register-login) center/cover,radial-gradient(circle at 30% 20%,#2a2275,#070712 70%);z-index:50;padding:16px}
+.card{width:min(380px,100%);background:#0c0d20cc;backdrop-filter:blur(16px);border:1px solid #7c8cff55;border-radius:22px;padding:26px;display:grid;gap:12px;color:#e8eaff;box-shadow:0 0 50px #5b4bff44}
+.card h1{text-align:center;font-size:26px;background:linear-gradient(90deg,#7c8cff,#00ffc8);-webkit-background-clip:text;color:transparent}
+.pri{background:linear-gradient(90deg,#5b6bff,#9b5bff);border:0;color:#fff;font-weight:600}
+.tabs{display:flex;gap:6px}.tabs button{flex:1}.tabs .on{background:var(--a);color:#000}
+#err{color:#ff7a8a;font-size:13px;text-align:center;min-height:16px}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top,0px));border-bottom:1px solid var(--b);position:relative;z-index:5}
+header .mid{position:absolute;left:50%;transform:translateX(-50%)}
+#side{position:fixed;top:0;bottom:0;left:0;width:280px;max-width:85%;background:var(--p);border-right:1px solid var(--b);z-index:30;transform:translateX(-100%);transition:.25s;padding:14px;padding-top:calc(14px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:8px;overflow:auto}
+#side.open{transform:none}
+#side button{text-align:left}
+#shade{position:fixed;inset:0;background:#0008;z-index:20}
+#hist button{width:100%;font-size:13px;margin-bottom:4px;text-align:left;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+main{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column}
+#bh{position:absolute;inset:0;width:100%;height:100%;opacity:.9}
+#msgs{position:relative;flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:min(720px,92%);padding:10px 14px;border-radius:16px;background:var(--p);border:1px solid var(--b);line-height:1.5;white-space:pre-wrap;word-break:break-word;box-shadow:var(--g)}
+.msg.u{align-self:flex-end;background:var(--a);color:#000}
+.msg pre{background:#000a;color:#cfe;padding:10px;border-radius:10px;overflow:auto;margin:6px 0}
+#hello{margin:auto;text-align:center;color:var(--m);pointer-events:none}
+#hello b{display:block;font-size:26px;color:var(--t)}
+#bar{position:relative;padding:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:center;border-top:1px solid var(--b);background:var(--bg)}
+#plus{position:absolute;bottom:68px;left:10px;display:flex;gap:8px;background:var(--p);padding:8px;border-radius:14px;border:1px solid var(--b)}
+#plus button{display:grid;gap:2px;place-items:center;font-size:11px;border:0}#plus i{font-style:normal;font-size:22px}
+#bar input{flex:1}#bar button{padding:10px 13px}
+.modal{position:fixed;inset:0;background:#000b;z-index:40;display:grid;place-items:center;padding:12px}
+.box{background:var(--bg);border:1px solid var(--b);border-radius:20px;width:min(980px,100%);max-height:92%;overflow:auto;padding:16px;display:grid;gap:12px;box-shadow:var(--g)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>input{flex:1;min-width:110px}
+.item{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--b);border-radius:12px;background:var(--p);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.mc{border:1px solid var(--b);border-radius:16px;padding:12px;background:var(--p);display:grid;gap:6px;font-size:13px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#888;margin-right:6px}.ok{background:#3dffb0;box-shadow:0 0 8px #3dffb0}.bad{background:#ff5a6e}
+.bar{height:8px;border-radius:6px;background:var(--b);overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--a),#b06bff)}
+#wire{position:relative}#wire svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.kb{justify-self:center;border:1px solid var(--a);border-radius:12px;padding:8px 14px;background:var(--p);font-size:13px;margin-bottom:34px;position:relative}
+</style></head><body>
+
+<div id="auth"><div class="card">
+<h1>✦ Mega AI</h1>
+<div class="tabs"><button id="tL" class="on">Masuk</button><button id="tR">Daftar</button></div>
+<input id="uN" placeholder="Nama pengguna"><input id="eM" class="hide" placeholder="Email"><input id="pW" type="password" placeholder="Kata sandi">
+<button class="pri" id="go">Masuk</button>
+<button id="goog">🇬 Lanjut dengan Google</button><div id="err"></div></div></div>
+
+<div id="app" class="hide">
+<header><button id="burger">☰</button><b>Mega AI</b>
+<button id="adminBtn" class="mid hide">⚙ Settings Admin</button>
+<span style="flex:1"></span><select id="modelSel" style="width:auto;max-width:150px"></select></header>
+<div id="shade" class="hide"></div>
+<aside id="side">
+<b>☰ Menu</b>
+<button id="nChat">＋ Obrolan baru</button><button id="bProj">📁 Proyek</button><button id="bArt">🧩 Artefak</button>
+<button id="bSet">🔧 Pengaturan</button>
+<div class="row"><span style="font-size:13px;color:var(--m)">Tema</span><button data-th="dark">Dark</button><button data-th="light">Light</button><button data-th="neon">Neon</button></div>
+<b style="font-size:13px;color:var(--m)">Riwayat obrolan</b><div id="hist"></div></aside>
+<main><canvas id="bh"></canvas><div id="msgs"><div id="hello"><b>Halo, saya Mega AI</b>Tanya apa saja…</div></div>
+<div id="bar"><div id="plus" class="hide"><button id="cam"><i>📷</i>Kamera</button><button id="pho"><i>🖼</i>Foto</button><button id="fil"><i>📎</i>File</button></div>
+<button id="pl">＋</button><input id="inp" placeholder="Ketik pesan…"><button id="mic">🎤</button><button id="send" class="pri">➤</button></div></main>
+<input type="file" id="fC" accept="image/*" capture="environment" class="hide"><input type="file" id="fP" accept="image/*" class="hide"><input type="file" id="fF" class="hide">
+</div>
+<div id="modal" class="modal hide"><div class="box" id="mbox"></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-auth-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-firestore-compat.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CFG=[
+{apiKey:"AIzaSyBFldXGwNIOD-MUBVX364SvEW-fYArOX94",authDomain:"databaseakun-ca8b0.firebaseapp.com",projectId:"databaseakun-ca8b0",storageBucket:"databaseakun-ca8b0.firebasestorage.app",messagingSenderId:"1074845646892",appId:"1:1074845646892:web:ca5665ffb67f89c8791189"},
+{apiKey:"AIzaSyDlE8PIScVWblcujHiYarwoeCxkyqlgCIg",authDomain:"databaseakun2-e7ded.firebaseapp.com",projectId:"databaseakun2-e7ded",storageBucket:"databaseakun2-e7ded.firebasestorage.app",messagingSenderId:"169339936950",appId:"1:169339936950:web:6dc2105b7204a964324617"},
+{apiKey:"AIzaSyB5yxIe_pcvltwiMIQ9hpi3Va6t5UC9hDQ",authDomain:"databaseakun3.firebaseapp.com",projectId:"databaseakun3",storageBucket:"databaseakun3.firebasestorage.app",messagingSenderId:"507597707947",appId:"1:507597707947:web:16190172fdaa1f922075ee"},
+{apiKey:"AIzaSyD4QS0vx9u7al2VBRaEF8BF-4HXcfWO_9M",authDomain:"databaseakun4-166f3.firebaseapp.com",projectId:"databaseakun4-166f3",storageBucket:"databaseakun4-166f3.firebasestorage.app",messagingSenderId:"609780734551",appId:"1:609780734551:web:f004327c086267b5b76112"},
+{apiKey:"AIzaSyCl7wUfMHmi6JXOqszUxEYyyi34tTPWvlE",authDomain:"databaseakun5-24141.firebaseapp.com",projectId:"databaseakun5-24141",storageBucket:"databaseakun5-24141.firebasestorage.app",messagingSenderId:"477797590189",appId:"1:477797590189:web:b7d4a7568eed4267899224"},
+{apiKey:"AIzaSyDdrI3jqcDGrVFDVWjmXdH0nDHchRQRMJs",authDomain:"databaseapidanmodel.firebaseapp.com",projectId:"databaseapidanmodel",storageBucket:"databaseapidanmodel.firebasestorage.app",messagingSenderId:"1008826510367",appId:"1:1008826510367:web:01e05e69e0c5640672792a"},
+{apiKey:"AIzaSyBIEpGO9aEj16wz4xn_rQrUeeXe7rZv7dE",authDomain:"databaserekampercakapan.firebaseapp.com",projectId:"databaserekampercakapan",storageBucket:"databaserekampercakapan.firebasestorage.app",messagingSenderId:"875548906774",appId:"1:875548906774:web:b69bfc197b0de595e6ec37"}];
+const APPS=CFG.map((c,i)=>firebase.initializeApp(c,'db'+(i+1)));
+const DB=APPS.map(a=>a.firestore()),AUTH=APPS[0].auth();
+const ACC=DB.slice(0,5),KEYDB=DB[5],LOGDB=DB[6];
+const ADMIN={u:'agung',p:'agungganteng'};
+let user=null,isAdmin=false,chat={id:Date.now(),title:'',msgs:[]},attach=null,models=[],keys=[];
+const ls=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+const sha=async s=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+
+/* THEME */
+function theme(t){document.documentElement.dataset.th=t;sv('th',t)}theme(ls('th','dark'));
+document.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>theme(b.dataset.th));
+
+/* AUTH */
+let mode='L';
+const setMode=m=>{mode=m;$('#tL').classList.toggle('on',m=='L');$('#tR').classList.toggle('on',m=='R');$('#eM').classList.toggle('hide',m=='L');$('#go').textContent=m=='L'?'Masuk':'Daftar'};
+$('#tL').onclick=()=>setMode('L');$('#tR').onclick=()=>setMode('R');
+async function findUser(name){for(let i=0;i<5;i++){const s=await ACC[i].collection('users').where('username','==',name).limit(1).get();if(!s.empty)return{db:i,id:s.docs[0].id,...s.docs[0].data()}}return null}
+async function leastDb(){let best=0,min=1e9;for(let i=0;i<5;i++){const n=(await ACC[i].collection('users').get()).size;if(n<min){min=n;best=i}}return best}
+$('#go').onclick=async()=>{
+ const u=$('#uN').value.trim(),p=$('#pW').value;$('#err').textContent='';
+ if(!u||!p)return $('#err').textContent='Isi semua kolom';
+ if(u===ADMIN.u&&p===ADMIN.p&&mode=='L'){return enter({username:'agung'},true)}
+ try{
+  const h=await sha(p),f=await findUser(u);
+  if(mode=='L'){if(!f||f.pass!==h)return $('#err').textContent='Nama pengguna / sandi salah';enter(f)}
+  else{if(f||u===ADMIN.u)return $('#err').textContent='Nama sudah dipakai';
+   const db=await leastDb(),data={username:u,email:$('#eM').value.trim(),pass:h,created:Date.now()};
+   await ACC[db].collection('users').add(data);enter({...data,db})}
+ }catch(e){$('#err').textContent='Error: '+e.message}};
+$('#goog').onclick=async()=>{try{
+ const r=await AUTH.signInWithPopup(new firebase.auth.GoogleAuthProvider()),us=r.user;
+ let f=await findUser(us.email);
+ if(!f){const db=await leastDb(),d={username:us.email,email:us.email,name:us.displayName,google:true,created:Date.now()};await ACC[db].collection('users').add(d);f={...d,db}}
+ enter(f)}catch(e){$('#err').textContent='Google: '+e.message}};
+async function enter(u,adm){
+ user=u;isAdmin=!!adm;$('#auth').classList.add('hide');$('#app').classList.remove('hide');
+ $('#adminBtn').classList.toggle('hide',!isAdmin);await loadCfg();renderHist();startBH()}
+async function loadCfg(){try{
+ models=(await KEYDB.collection('models').get()).docs.map(d=>({id:d.id,...d.data()}));
+ keys=(await KEYDB.collection('apikeys').get()).docs.map(d=>({id:d.id,...d.data()}))}catch(e){console.warn(e)}
+ const act=models.filter(m=>m.active!==false);
+ $('#modelSel').innerHTML=act.map(m=>`<option value="${esc(m.model)}">${esc(m.name)}</option>`).join('')||'<option value="">(belum ada model)</option>'}
+
+/* MENU */
+const side=o=>{$('#side').classList.toggle('open',o);$('#shade').classList.toggle('hide',!o)};
+$('#burger').onclick=()=>side(1);$('#shade').onclick=()=>side(0);
+const modal=h=>{$('#mbox').innerHTML=h+'<button onclick="$(\'#modal\').classList.add(\'hide\')">Tutup</button>';$('#modal').classList.remove('hide')};
+$('#nChat').onclick=()=>{chat={id:Date.now(),title:'',msgs:[]};drawChat();side(0)};
+$('#bProj').onclick=()=>{side(0);projUI()};
+function projUI(){const P=ls('proj',[]);modal(`<h3>📁 Proyek</h3><div class="row"><input id="pn" placeholder="Nama proyek baru"><button onclick="if($('#pn').value){sv('proj',[...ls('proj',[]),$('#pn').value]);projUI()}">Tambah</button></div>`+P.map((p,i)=>`<div class="item">${esc(p)}<button onclick="sv('proj',ls('proj',[]).filter((_,j)=>j!=${i}));projUI()">🗑</button></div>`).join(''))}
+$('#bArt').onclick=()=>{side(0);const A=ls('art',[]);modal('<h3>🧩 Artefak</h3>'+(A.map(a=>`<div class="item" style="display:block"><b>${esc(a.t)}</b><pre style="overflow:auto;font-size:12px">${esc(a.c)}</pre></div>`).join('')||'<p>Belum ada. Kode dari AI otomatis tersimpan di sini.</p>'))};
+$('#bSet').onclick=()=>{side(0);modal(`<h3>🔧 Pengaturan</h3><div class="item">Akun: ${esc(user.username)}${isAdmin?' (admin)':''}</div><button onclick="sv('hist',[]);renderHist()">Hapus semua riwayat</button><button onclick="location.reload()">Keluar</button>`)};
+function renderHist(){$('#hist').innerHTML=ls('hist',[]).map(c=>`<button data-i="${c.id}">💬 ${esc(c.title||'Obrolan')}</button>`).join('');
+ $('#hist').querySelectorAll('button').forEach(b=>b.onclick=()=>{chat=ls('hist',[]).find(c=>c.id==b.dataset.i);drawChat();side(0)})}
+function saveChat(){let H=ls('hist',[]).filter(c=>c.id!=chat.id);H.unshift(chat);sv('hist',H.slice(0,40));renderHist()}
+
+/* CHAT */
+const fmt=t=>esc(t).replace(/```(\w*)\n?([\s\S]*?)```/g,'<pre>$2</pre>');
+function drawChat(){const m=$('#msgs');m.innerHTML=chat.msgs.length?'':'<div id="hello"><b>Halo, saya Mega AI</b>Tanya apa saja…</div>';chat.msgs.forEach(x=>add(x.role=='user'?'u':'a',typeof x.content=='string'?x.content:x.content.find(c=>c.type=='text')?.text||''));}
+function add(c,t){const d=document.createElement('div');d.className='msg '+c;d.innerHTML=fmt(t);$('#hello')?.remove();$('#msgs').append(d);$('#msgs').scrollTop=1e9;return d}
+async function ask(msgs,model){
+ let err='';const pool=keys.filter(k=>k.active!==false).sort(()=>Math.random()-.5);
+ if(!pool.length)throw Error('Belum ada API key aktif. Admin: tambahkan di Settings Admin.');
+ for(const k of pool){try{
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+k.key},body:JSON.stringify({model,messages:msgs,max_tokens:1500})});
+  const j=await r.json();if(r.ok)return j.choices[0].message.content;err=j.error?.message||r.status}catch(e){err=e.message}}
+ throw Error('Model sedang sibuk. Coba lagi dalam beberapa detik. ('+err+')')}
+async function sendMsg(){
+ const t=$('#inp').value.trim();if(!t&&!attach)return;$('#inp').value='';
+ let content=t;
+ if(attach?.img)content=[{type:'text',text:t||'Jelaskan gambar ini'},{type:'image_url',image_url:{url:attach.img}}];
+ else if(attach?.txt)content=t+'\n\n[File '+attach.name+']\n'+attach.txt.slice(0,6000);
+ attach=null;
+ chat.msgs.push({role:'user',content});if(!chat.title)chat.title=t.slice(0,30);
+ add('u',t||'📎 lampiran');const w=add('a','…');
+ try{const sel=$('#modelSel').value;if(!sel)throw Error('Belum ada model aktif.');
+  const a=await ask([{role:'system',content:'Kamu Mega AI, asisten ramah berbahasa Indonesia.'},...chat.msgs.slice(-12)],sel);
+  w.innerHTML=fmt(a);chat.msgs.push({role:'assistant',content:a});
+  [...a.matchAll(/```(\w*)\n?([\s\S]*?)```/g)].forEach(m=>sv('art',[{t:chat.title,c:m[2]},...ls('art',[])].slice(0,30)));
+  LOGDB.collection('conversations').add({user:user.username,model:sel,q:t,a,time:Date.now()}).catch(()=>{});
+ }catch(e){w.textContent='⚠️ '+e.message;chat.msgs.pop()}
+ saveChat()}
+$('#send').onclick=sendMsg;$('#inp').onkeydown=e=>{if(e.key=='Enter')sendMsg()};
+$('#pl').onclick=()=>$('#plus').classList.toggle('hide');
+$('#cam').onclick=()=>$('#fC').click();$('#pho').onclick=()=>$('#fP').click();$('#fil').onclick=()=>$('#fF').click();
+[$('#fC'),$('#fP'),$('#fF')].forEach(f=>f.onchange=()=>{const x=f.files[0];if(!x)return;const r=new FileReader();
+ r.onload=()=>{attach=x.type.startsWith('image/')?{img:r.result,name:x.name}:{txt:r.result,name:x.name};$('#inp').placeholder='📎 '+x.name+' — tulis pesan';$('#plus').classList.add('hide')};
+ x.type.startsWith('image/')?r.readAsDataURL(x):r.readAsText(x)});
+$('#mic').onclick=()=>{const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R)return alert('Browser tidak mendukung suara');
+ const r=new R();r.lang='id-ID';r.onresult=e=>{$('#inp').value=e.results[0][0].transcript};r.start();$('#mic').textContent='🔴';r.onend=()=>$('#mic').textContent='🎤'};
+
+/* BLACK HOLE */
+let bhOn=0;
+function startBH(){if(bhOn)return;bhOn=1;const c=$('#bh'),x=c.getContext('2d');let W,H,t=0,objs=[],last=0;
+ const rs=()=>{W=c.width=c.offsetWidth;H=c.height=c.offsetHeight};rs();addEventListener('resize',rs);
+ const col=()=>getComputedStyle(document.documentElement).getPropertyValue('--a').trim()||'#7c8cff';
+ (function f(ts){t+=.02;const cx=W/2,cy=H*.42,R=Math.min(W,H)*.1;x.clearRect(0,0,W,H);
+  if(ts-last>3000){last=ts;const a=Math.random()*6.28,d=Math.max(W,H)*.5,ast=Math.random()<.5;objs.push({a,d,r:ast?4+Math.random()*4:8+Math.random()*10,h:Math.random()*360,ast})}
+  const A=col();
+  const g=x.createRadialGradient(cx,cy,R,cx,cy,R*4);g.addColorStop(0,A+'88');g.addColorStop(1,'#0000');x.fillStyle=g;x.beginPath();x.arc(cx,cy,R*4,0,7);x.fill();
+  for(let i=0;i<4;i++){x.save();x.translate(cx,cy);x.scale(1,.32);x.rotate(t*(.4+i*.15));x.strokeStyle=`hsla(${30+i*18},100%,${60-i*6}%,${.7-i*.12})`;x.lineWidth=R*.2;x.setLineDash([R*2,R*.4]);x.beginPath();x.arc(0,0,R*(1.5+i*.35),0,6.28);x.stroke();x.restore()}
+  x.fillStyle='#000';x.shadowColor=A;x.shadowBlur=30;x.beginPath();x.arc(cx,cy,R,0,7);x.fill();x.shadowBlur=0;x.strokeStyle='#fff6';x.lineWidth=2;x.stroke();
+  objs=objs.filter(o=>o.d>R*.5);objs.forEach(o=>{o.a+=.03+90/o.d*.02;o.d-=1.3+(1-o.d/Math.max(W,H))*2;const k=Math.min(1,(o.d-R*.5)/(R*3)),px=cx+Math.cos(o.a)*o.d,py=cy+Math.sin(o.a)*o.d*.5,r=o.r*Math.max(.2,k);
+   x.fillStyle=o.ast?'#a89c8c':`hsl(${o.h},70%,55%)`;x.beginPath();x.arc(px,py,r,0,7);x.fill();if(!o.ast){x.strokeStyle='#fff5';x.beginPath();x.ellipse(px,py,r*1.7,r*.4,.3,0,7);x.stroke()}});
+  requestAnimationFrame(f)})(0)}
+
+/* ADMIN */
+$('#adminBtn').onclick=()=>adminUI('key');
+function adminUI(tab){
+ const T=[['key','🔑 API Key'],['model','🤖 Model'],['status','📡 Status'],['db','🗄 Database'],['log','💬 Rekaman']];
+ modal(`<div class="row">${T.map(([k,l])=>`<button ${k==tab?'style="border-color:var(--a)"':''} onclick="adminUI('${k}')">${l}</button>`).join('')}</div><div id="ab">Memuat…</div>`);
+ ({key:aKey,model:aModel,status:aStatus,db:aDb,log:aLog})[tab]()}
+async function aKey(){await loadCfg();$('#ab').innerHTML=`<div class="row"><input id="kn" placeholder="Nama (mis. Groq 1)"><input id="kv" placeholder="API key Groq (gsk_...)"><button class="pri" onclick="saveKey()">Tambah</button></div>`+(keys.map(k=>`<div class="item"><span><span class="dot ${k.active!==false?'ok':'bad'}"></span>${esc(k.name)} · ${esc(k.key.slice(0,8))}…</span><span><button onclick="editKey('${k.id}')">✏️</button><button onclick="togKey('${k.id}',${k.active!==false})">⏯</button><button onclick="delKey('${k.id}')">🗑</button></span></div>`).join('')||'<p>Belum ada API key.</p>')}
+async function saveKey(){if(!$('#kv').value)return;await KEYDB.collection('apikeys').add({name:$('#kn').value||'Key',key:$('#kv').value.trim(),active:true});aKey()}
+async function editKey(id){const k=prompt('API key baru:');if(k){await KEYDB.collection('apikeys').doc(id).update({key:k.trim()});aKey()}}
+async function togKey(id,a){await KEYDB.collection('apikeys').doc(id).update({active:!a});aKey()}
+async function delKey(id){if(confirm('Hapus key?')){await KEYDB.collection('apikeys').doc(id).delete();aKey()}}
+async function aModel(){await loadCfg();$('#ab').innerHTML=`<div class="row"><input id="mn" placeholder="Nama tampilan"><input id="mi" placeholder="ID model Groq (mis. llama-3.3-70b-versatile)"><button class="pri" onclick="saveModel()">Tambah</button></div>`+(models.map(m=>`<div class="item"><span><span class="dot ${m.active!==false?'ok':'bad'}"></span>${esc(m.name)} · ${esc(m.model)}</span><span><button onclick="editModel('${m.id}')">✏️</button><button onclick="togModel('${m.id}',${m.active!==false})">⏯</button><button onclick="delModel('${m.id}')">🗑</button></span></div>`).join('')||'<p>Belum ada model.</p>')}
+async function saveModel(){if(!$('#mi').value)return;await KEYDB.collection('models').add({name:$('#mn').value||$('#mi').value,model:$('#mi').value.trim(),active:true});aModel()}
+async function editModel(id){const m=prompt('ID model baru:');if(m){await KEYDB.collection('models').doc(id).update({model:m.trim()});aModel()}}
+async function togModel(id,a){await KEYDB.collection('models').doc(id).update({active:!a});aModel()}
+async function delModel(id){if(confirm('Hapus model?')){await KEYDB.collection('models').doc(id).delete();aModel()}}
+async function aStatus(){await loadCfg();const K=keys.filter(k=>k.active!==false);
+ $('#ab').innerHTML=`<div id="wire"><svg id="sv"></svg><div class="row" style="justify-content:center;margin-bottom:30px">${K.map((k,i)=>`<div class="kb" id="k${i}"><span class="dot ok"></span>${esc(k.name)}</div>`).join('')||'<div class="kb">Belum ada API key</div>'}</div><div class="grid">${models.map((m,i)=>`<div class="mc" id="m${i}"><b><span class="dot" id="d${i}"></span>${esc(m.name)}</b><small>${esc(m.model)}</small><small id="s${i}">Mengecek…</small></div>`).join('')}</div></div>`;
+ const sv=$('#sv'),W=$('#wire').getBoundingClientRect();
+ models.forEach(async(m,i)=>{const kk=K[i%Math.max(K.length,1)];
+  if(kk){const a=$('#k'+(i%K.length)).getBoundingClientRect(),b=$('#m'+i).getBoundingClientRect(),x1=a.left+a.width/2-W.left,y1=a.bottom-W.top,x2=b.left+b.width/2-W.left,y2=b.top-W.top;
+   sv.innerHTML+=`<path d="M${x1} ${y1} C${x1} ${y1+40},${x2} ${y2-40},${x2} ${y2}" fill="none" stroke="var(--a)" stroke-dasharray="5 5"><animate attributeName="stroke-dashoffset" from="20" to="0" dur="1s" repeatCount="indefinite"/></path>`}
+  try{if(!kk)throw Error('no key');const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+kk.key},body:JSON.stringify({model:m.model,messages:[{role:'user',content:'hi'}],max_tokens:1})});
+   $('#d'+i).className='dot '+(r.ok?'ok':'bad');$('#s'+i).textContent=r.ok?'Berjalan ✓ · key: '+kk.name:'Sibuk / error ('+r.status+')'}
+  catch{$('#d'+i).className='dot bad';$('#s'+i).textContent='Tidak aktif'}})}
+async function aDb(){const n=['DB 1 · Akun','DB 2 · Akun','DB 3 · Akun','DB 4 · Akun','DB 5 · Akun'];let h='',tot=0;const cs=[];
+ for(let i=0;i<5;i++){try{cs.push((await ACC[i].collection('users').get()).size)}catch{cs.push(0)}}
+ const mx=Math.max(50,...cs);
+ h='<div class="grid">'+cs.map((c,i)=>`<div class="mc"><b>${n[i]}</b><span>${c} akun</span><div class="bar"><i style="width:${c/mx*100}%"></i></div></div>`).join('')+'</div>';
+ $('#ab').innerHTML=h+`<div class="item">DB 6 · API Key & Model: ${keys.length} key, ${models.length} model</div><div class="item">Total akun: ${cs.reduce((a,b)=>a+b,0)}</div>`}
+async function aLog(){const s=await LOGDB.collection('conversations').orderBy('time','desc').limit(30).get();
+ $('#ab').innerHTML='<b>DB 7 · Rekaman percakapan (30 terbaru)</b>'+(s.docs.map(d=>{const x=d.data();return `<div class="item" style="display:block"><b>${esc(x.user)}</b> · ${esc(x.model)}<br>Q: ${esc(x.q)}<br>A: ${esc((x.a||'').slice(0,200))}</div>`}).join('')||'<p>Belum ada.</p>')}
+</script></body></html>
