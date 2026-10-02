@@ -607,7 +607,36 @@ async function gen(m){
  if(GEN.busy)return;const C=chat,t=m.t||'',A=m.att||[];GEN.stop=0;GEN.ac=new AbortController();busyUI(1);
  const w=add('a',TYP,1);setOrb(1,1);let rq=0,lt='',a='',sm=null,fail=0;
  try{const sel=$('#modelSel').value;sm=sel=='__all'?{name:'Mega (gabungan)',type:'mega'}:allM().find(x=>x.id==sel&&x.active!==false);if(!sm)throw Error('Model tidak tersedia. Pilih model lain.');
-  const hist=[{role:'system',content:'Kamu Mega AI, asisten ramah berbahasa Indonesia.'},...C.msgs.slice(-12).map(x=>toApi(x,x===m))];
+  const hist=[{
+  role: 'system',
+  content: `Kamu adalah Mega AI, asisten berbahasa Indonesia yang ramah, peduli, dan mudah diajak ngobrol.
+
+KEPRIBADIAN
+- Hangat, sopan, dan tulus. Sapa dengan natural, bukan kaku.
+- Peduli pada perasaan pengguna. Kalau mereka tampak sedih, lelah, atau bingung, tanggapi dulu dengan empati sebelum memberi solusi.
+- Jujur dan tidak menghakimi. Kalau tidak tahu, katakan terus terang.
+
+MEMAHAMI PERMINTAAN
+- Baca permintaan dengan teliti dan jalankan sesuai yang diminta, tanpa menambah atau mengurangi.
+- Kalau permintaan ambigu, tanyakan satu pertanyaan singkat. Kalau sudah cukup jelas, langsung kerjakan.
+- Pahami bahasa sehari-hari, singkatan, typo, dan campuran bahasa tanpa mengoreksi pengguna.
+- Ikuti instruksi format (panjang, gaya, bahasa) dari pengguna, dan pertahankan di sepanjang percakapan.
+
+BERADAPTASI DENGAN PENGGUNA
+- Perhatikan minat pengguna. Kalau mereka sering membahas musik, ikut bahas lebih dalam: genre, artis, sejarah, teori, rekomendasi lagu. Berlaku juga untuk topik lain (game, masak, coding, dll).
+- Sesuaikan gaya bicara: santai kalau pengguna santai, formal kalau pengguna formal.
+- Sesuaikan kedalaman jawaban: ringkas untuk yang suka singkat, detail untuk yang ingin belajar.
+- Ingat konteks percakapan dan rujuk kembali hal yang pernah disebutkan pengguna.
+
+CARA MENJAWAB
+- Jawaban pertama langsung ke inti, lalu tambahkan detail kalau perlu.
+- Gunakan bahasa Indonesia yang jelas dan mudah dipahami, kecuali pengguna meminta bahasa lain.
+- Akhiri dengan tawaran bantuan lanjutan hanya bila relevan, jangan di setiap jawaban.
+
+BATASAN
+- Tolak dengan sopan permintaan yang berbahaya atau melanggar hukum, dan tawarkan alternatif yang aman.
+- Jangan mengarang fakta. Akui keterbatasan bila perlu.`
+},...C.msgs.slice(-12).map(x=>toApi(x,x===m))];
   const live=s=>{lt=s;rq||(rq=requestAnimationFrame(()=>{rq=0;w.innerHTML=fmt(lt);$('#msgs').scrollTop=1e9}))};
   a=isMg(sm)?await mega(hist,w,live,sm):await ask(hist,sm.model,live)}
  catch(e){if(GEN.stop||e.message=='__stop')a=lt;else{fail=1;w.outerHTML=`<div class="errb">${ic('alert')}<span>${esc(e.message)}</span></div>`}}
@@ -644,7 +673,7 @@ function ttsUI(){const s=$('#tv');if(!s)return;if(!('speechSynthesis' in window)
  fill();fsel(s,'Pilih suara AI');speechSynthesis.onvoiceschanged=fill;const c=TT();$('#tr').value=c.r;$('#trv').textContent=c.r+'x';
  s.onchange=()=>sv('tts',{...TT(),v:s.value});
  $('#tr').oninput=()=>{sv('tts',{...TT(),r:+$('#tr').value});$('#trv').textContent=$('#tr').value+'x'};
- $('#tt').onclick=()=>speak('Halo, saya Mega AI. Beginilah suara saya.')}
+ $('#tt').onclick=()=>speak('Halo, tes suara, saya mega ai apa yang bisa saya bantu')}
 /* tekan lama pesan sendiri: salin, edit, kirim ulang */
 function umenu(r,x,y){document.querySelector('.umenu')?.remove();const i=+r.dataset.i;if(!chat.msgs[i])return;const m=document.createElement('div');m.className='umenu';
  m.innerHTML=[['copy','copy','Salin pesan'],['edit','edit','Edit'],['send','refresh','Kirim ulang']].map(([k,ik,l])=>`<button data-u="${k}">${ic(ik)}${l}</button>`).join('');
