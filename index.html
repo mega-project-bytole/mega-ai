@@ -427,7 +427,61 @@ const acts=(e,t,d,a)=>`<span class="row"><button onclick="${e}" aria-label="Ubah
 const KC=()=>getDB(5).collection('apikeys'),MC=()=>getDB(5).collection('models');
 function aKey(){loadCfg();$('#ab').innerHTML=`<div class="row"><input id="kn" placeholder="Nama (mis. Groq 1)"><input id="kv" placeholder="API key Groq (gsk_...)"><button class="pri" id="ksv">${ic('plus')}Tambah</button></div><p style="font-size:12.5px;color:var(--m)">Key disimpan di database dan langsung dipakai semua pengguna.</p><div id="al" style="display:grid;gap:8px"></div>`;$('#ksv').onclick=saveKey;drawKeys()}
 function drawKeys(){const el=$('#al');if(!el)return;el.innerHTML=keys.map(k=>`<div class="item"><span><span class="dot ${k.active!==false?'ok':'bad'}"></span>${esc(k.name)} · ${esc((k.key||'').slice(0,4))}••••${esc((k.key||'').slice(-4))}</span>${acts(`editKey('${k.id}')`,`togKey('${k.id}',${k.active!==false})`,`delKey('${k.id}')`)}</div>`).join('')||'<p>Belum ada API key.</p>'}
-function saveKey(){const v=$('#kv').value.trim();if(!v)return toast('Isi API key','err');if(keys.some(k=>k.key==v))return toast('Key ini sudah ada','err');{const ref=KC().doc(),d={name:$('#kn').value.trim()||'Key',key:v,active:true,created:Date.now()};wr(()=>ref.set(d),'API key tersimpan',aKey,$('#ksv'))}}
+// KODE PERBAIKAN saveKey
+function saveKey(){
+  const v=$('#kv').value.trim();
+  if(!v)return toast('Isi API key','err');
+  if(keys.some(k=>k.key==v))return toast('Key ini sudah ada','err');
+  
+  const ref = KC().doc();
+  const d = {
+    name: $('#kn').value.trim() || 'Key',
+    key: v,
+    active: true,
+    created: Date.now()
+  };
+
+  const btn = $('#ksv');
+  wr(
+    () => ref.set(d), 
+    'API key tersimpan', 
+    () => { $('#kv').value = ''; $('#kn').value = ''; aKey(); }, 
+    btn
+  );
+}
+
+// KODE PERBAIKAN saveModel
+function saveModel(){
+  const n = $('#mn2').value.trim();
+  const t = $('#mt').value;
+  const btn = $('#msv');
+
+  if(t === 'single'){
+    const id = $('#mi').value.trim();
+    if(!id) return toast('Isi ID model Groq','err');
+    const ref = edId ? MC().doc(edId) : MC().doc();
+    const d = { name: n || id, model: id };
+    
+    return wr(
+      () => edId ? ref.update(d) : ref.set({...d, type:'single', active:true}),
+      'Model tersimpan',
+      () => aModel(),
+      btn
+    );
+  }
+
+  if(!n) return toast('Isi nama model gabungan','err');
+  const d = { name: n, type: 'mega', members: [...memSel] };
+  const ref = edId ? MC().doc(edId) : MC().doc();
+  const mid = 'mega-' + Date.now().toString(36);
+
+  wr(
+    () => edId ? ref.update(d) : ref.set({...d, model: mid, active:true}),
+    'Model tersimpan',
+    () => aModel(),
+    btn
+  );
+}
 async function editKey(id){const k=await dlg('API key baru','');if(k&&k.trim())wr(()=>KC().doc(id).update({key:k.trim()}),'API key diperbarui')}
 function togKey(id,a){wr(()=>KC().doc(id).update({active:!a}),a?'Key dinonaktifkan':'Key diaktifkan')}
 async function delKey(id){if(await dlg('Hapus API key ini?'))wr(()=>KC().doc(id).delete(),'API key dihapus')}
@@ -437,10 +491,6 @@ function aModel(){loadCfg();memSel=new Set();edId=null;$('#ab').innerHTML=`<div 
 function mtype(){const g=$('#mt').value=='mega';$('#mi').classList.toggle('hide',g);$('#mg').classList.toggle('hide',!g);drawMembers()}
 function drawMembers(){const el=$('#mm');if(!el)return;el.innerHTML=models.filter(m=>!isMg(m)).map(m=>`<label class="item" style="cursor:pointer"><span><span class="dot ${m.active!==false?'ok':'bad'}"></span>${esc(m.name)} · ${esc(m.model)}</span><input type="checkbox" style="width:auto;padding:0" value="${m.id}" ${memSel.has(m.id)?'checked':''}></label>`).join('')||'<p style="color:var(--m)">Tambahkan model single dulu.</p>';el.querySelectorAll('input').forEach(i=>i.onchange=()=>{i.checked?memSel.add(i.value):memSel.delete(i.value)})}
 function drawModels(){const el=$('#al');if(!el)return;el.innerHTML=models.map(m=>`<div class="item"><span><span class="dot ${m.active!==false?'ok':'bad'}"></span>${esc(m.name)} · ${isMg(m)?'Gabungan ('+(m.members&&m.members.length?m.members.filter(x=>models.some(y=>y.id==x)).length+' model':'semua model')+')':esc(m.model)}</span>${acts(`editModel('${m.id}')`,`togModel('${m.id}',${m.active!==false})`,`delModel('${m.id}')`)}</div>`).join('')||'<p>Belum ada model. Tanpa model gabungan buatan sendiri, pengguna memakai "Mega (gabungan)" dari semua model aktif.</p>'}
-function saveModel(){const n=$('#mn2').value.trim(),t=$('#mt').value;
- if(t=='single'){const id=$('#mi').value.trim();if(!id)return toast('Isi ID model Groq','err');{const ref=edId?MC().doc(edId):MC().doc(),d={name:n||id,model:id};return wr(()=>edId?ref.update(d):ref.set({...d,type:'single',active:true}),'Model tersimpan',aModel,$('#msv'))}}
- if(!n)return toast('Isi nama model gabungan','err');const d={name:n,type:'mega',members:[...memSel]};
- {const ref=edId?MC().doc(edId):MC().doc(),mid='mega-'+Date.now().toString(36);wr(()=>edId?ref.update(d):ref.set({...d,model:mid,active:true}),'Model tersimpan',aModel,$('#msv'))}}
 function editModel(id){const m=models.find(x=>x.id==id);if(!m)return;aModel();edId=id;const g=isMg(m);$('#mn2').value=m.name;$('#mt').value=g?'mega':'single';$('#mt').disabled=true;$('#mi').value=m.model||'';memSel=new Set(m.members||[]);mtype();$('#msv').innerHTML=ic('check')+'Simpan';$('#mcx').classList.remove('hide');$('#mn2').scrollIntoView({block:'center'})}
 function togModel(id,a){wr(()=>MC().doc(id).update({active:!a}),a?'Model dinonaktifkan':'Model diaktifkan')}
 async function delModel(id){if(await dlg('Hapus model ini?'))wr(()=>MC().doc(id).delete(),'Model dihapus')}
